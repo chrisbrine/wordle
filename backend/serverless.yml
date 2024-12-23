@@ -1,0 +1,31 @@
+service: lambda-php
+
+provider:
+    name: aws
+    region: us-east-1
+    ecr:
+        images:
+            lambda-php:
+                path: ./ # Docker image for your Lambda function
+
+functions:
+    lambda-php:
+        handler: src/index.php
+        runtime: php-82-fpm
+        events:
+            - httpApi: "*"
+        environment:
+            DB_HOST: lambdaphpsql.cnmqoa006ph4.us-east-1.rds.amazonaws.com # change to your RDS endpoint
+            DB_PORT: 3306
+            DB_NAME: lambdaphpsql # change to database you want to use
+            DB_USER: lambda # change to user you want to use
+            DB_PASS: MySecurePassword # change to password you want to use
+            DOCUMENT_ROOT: public
+
+package:
+    patterns: # Exclude unnecessary files from deployment
+        - "!node_modules/**"
+        - "!tests/**"
+
+plugins:
+    - ./vendor/bref/bref
