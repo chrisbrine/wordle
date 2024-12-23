@@ -1,0 +1,40 @@
+service: vite-app-deploy
+
+provider:
+    name: aws
+    runtime: nodejs18.x
+    region: us-east-1
+
+resources:
+    Resources:
+        ViteAppBucket:
+            Type: AWS::S3::Bucket
+            Properties:
+                BucketName: vite-app-${opt:stage, 'dev'}-bucket
+                WebsiteConfiguration:
+                    IndexDocument: index.html
+                    ErrorDocument: index.html
+                PublicAccessBlockConfiguration:
+                    BlockPublicAcls: false
+                    BlockPublicPolicy: false
+                    IgnorePublicAcls: false
+                    RestrictPublicBuckets: false
+
+        ViteAppBucketPolicy:
+            Type: AWS::S3::BucketPolicy
+            Properties:
+                Bucket: !Ref ViteAppBucket
+                PolicyDocument:
+                    Version: "2012-10-17"
+                    Statement:
+                        - Sid: PublicReadGetObject
+                          Effect: Allow
+                          Principal: "*"
+                          Action: s3:GetObject
+                          Resource: !Sub "${ViteAppBucket.Arn}/*"
+
+functions: {} # No functions are needed for static deployments
+
+custom:
+    bucketName: vite-app-${opt:stage, 'dev'}-bucket
+    distributionFolder: dist
